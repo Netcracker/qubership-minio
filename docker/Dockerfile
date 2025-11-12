@@ -10,16 +10,17 @@ WORKDIR /workspace
 RUN git clone --depth=1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com/minio/minio.git && \
     cd minio && \
     go mod edit -go=1.25 -toolchain=go1.25.4 && \
-    cat go.mod && \
+    go mod tidy && \
     go mod download && \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /tmp/minio .
+    CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o /tmp/minio .
 
 # Clone & build mc
 RUN git clone --depth=1 --branch RELEASE.2025-08-13T08-35-41Z https://github.com/minio/mc.git && \
     cd mc && \
     go mod edit -go=1.25 -toolchain=go1.25.4 && \
+    go mod tidy && \
     go mod download && \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o /tmp/mc .
+    CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o /tmp/mc .
 
 # Runtime image
 FROM alpine:3.22.2
