@@ -58,7 +58,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=tag
-            type=raw,value=dev,enable={{branch == 'develop'}}
+            type=raw,value=dev,enable={{equals branch "develop"}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
