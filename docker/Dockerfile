@@ -26,8 +26,7 @@ RUN git clone --depth=1 --branch RELEASE.2025-08-13T08-35-41Z https://github.com
 FROM alpine:3.22.2
 
 # Apply security updates
-RUN apk update && apk upgrade --no-cache && \
-    true
+RUN apk update && apk upgrade --no-cache 
 
 # Copy artifacts
 COPY --from=builder /tmp/minio /usr/bin/minio

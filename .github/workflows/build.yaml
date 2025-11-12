@@ -5,18 +5,7 @@ permissions:
   actions: read
 on:
   push:
-    branches:
-      - '**'
-    paths-ignore:
-      - '.github/**'
-      - 'docs/**'
-      - 'CODE-OF-CONDUCT.md'
-      - 'CONTRIBUTING.md'
-      - 'LICENSE'
-      - 'README.md'
-      - 'SECURITY.md'
-  pull_request:
-    branches:
+    tags:
       - '**'
     paths-ignore:
       - '.github/**'
@@ -28,19 +17,15 @@ on:
       - 'SECURITY.md'
 
 env:
-  TAG_NAME: ${{ github.event.release.tag_name || github.ref }}
+  TAG_NAME: ${{ github.ref_name }}
   GITHUB_GROUP: ${{ github.repository_owner }}
 
 concurrency:
-  # On main/release, we don't want any jobs cancelled so the sha is used to name the group
-  # On PR branches, we cancel the job if new commits are pushed
-  # More info: https://stackoverflow.com/a/68422069/253468
-  group: ${{ github.ref == 'refs/heads/main' && format('ci-main-{0}', github.sha) || format('ci-main-{0}', github.ref) }}
+  group: ${{ format('ci-tag-{0}', github.ref) }}
   cancel-in-progress: true
 
 jobs:
   multiplatform_build:
-    if: github.event.pull_request.user.login != 'dependabot[bot]' || github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +49,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare Tag
-        run: echo "TAG_NAME=$(echo ${TAG_NAME} | sed 's@refs/tags/@@;s@refs/heads/@@;s@/@_@g')" >> $GITHUB_ENV
+        run: echo "TAG_NAME=$(echo ${TAG_NAME} | sed 's@/@_@g')" >> $GITHUB_ENV
       - name: Prepare Group
         run: echo "GITHUB_GROUP=${GITHUB_GROUP,,}" >> $GITHUB_ENV
       - name: Get package IDs for delete
@@ -74,7 +59,6 @@ jobs:
           component-name: ${{ matrix.component.name }}
           component-tag: ${{ steps.meta.outputs.tags }}
           access-token: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ github.event_name != 'pull_request' && github.actor != 'dependabot[bot]' }}
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -82,8 +66,7 @@ jobs:
           context: ${{ matrix.component.context }}
           file: ${{ matrix.component.file }}
           platforms: linux/arm64,linux/amd64,linux/ppc64le,linux/s390x
-          # See https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#fetching-metadata-about-a-pull-request
-          push: ${{ github.event_name != 'pull_request' && github.actor != 'dependabot[bot]' }}
+          push: true
           provenance: false
           tags: ghcr.io/${{ env.GITHUB_GROUP }}/${{ matrix.component.name }}:${{ env.TAG_NAME }}
           labels: ${{ steps.meta.outputs.labels }}
