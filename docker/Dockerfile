@@ -35,6 +35,8 @@ COPY --from=builder /workspace/minio/dockerscripts/docker-entrypoint.sh /usr/bin
 
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
+ENV MC_CONFIG_DIR=/tmp
+
 EXPOSE 9000
 
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
