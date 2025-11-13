@@ -23,10 +23,12 @@ RUN git clone --depth=1 --branch RELEASE.2025-08-13T08-35-41Z https://github.com
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o /tmp/mc .
 
 # Runtime image
-FROM alpine:3.22.2
+FROM registry.access.redhat.com/ubi9/ubi-micro:latest
 
 # Apply security updates
 RUN apk update && apk upgrade --no-cache 
+
+LABEL version="RELEASE.2025-10-15T17-29-55Z"
 
 # Copy artifacts
 COPY --from=builder /tmp/minio /usr/bin/minio
