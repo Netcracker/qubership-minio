@@ -14,6 +14,9 @@ on:
       - 'CONTRIBUTING.md'
       - 'LICENSE'
       - 'README.md'
+      - 'SECURITY.md'
+    tags:
+      - '*'
   pull_request:
     branches:
       - '**'
@@ -25,10 +28,6 @@ on:
       - 'LICENSE'
       - 'README.md'
       - 'SECURITY.md'
-
-env:
-  TAG_NAME: ${{ github.event.release.tag_name || github.ref }}
-  GITHUB_GROUP: ${{ github.repository_owner }}
 
 concurrency:
   # On main/release, we don't want any jobs cancelled so the sha is used to name the group
@@ -52,6 +51,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.component.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -62,10 +70,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Prepare Tag
-        run: echo "TAG_NAME=$(echo ${TAG_NAME} | sed 's@refs/tags/@@;s@refs/heads/@@;s@/@_@g')" >> $GITHUB_ENV
-      - name: Prepare Group
-        run: echo "GITHUB_GROUP=${GITHUB_GROUP,,}" >> $GITHUB_ENV
       - name: Get package IDs for delete
         id: get-ids-for-delete
         uses: Netcracker/get-package-ids@v0.0.1
@@ -80,9 +84,15 @@ jobs:
           no-cache: true
           context: ${{ matrix.component.context }}
           file: ${{ matrix.component.file }}
-          platforms: linux/arm64,linux/amd64,linux/ppc64le,linux/s390x
+          platforms: linux/amd64,linux/arm64
           # See https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions#fetching-metadata-about-a-pull-request
           push: ${{ github.event_name != 'pull_request' && github.actor != 'dependabot[bot]' }}
           provenance: false
-          tags: ghcr.io/${{ env.GITHUB_GROUP }}/${{ matrix.component.name }}:${{ env.TAG_NAME }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ matrix.component.name }}
+          package-type: 'container'
+          package-version-ids: ${{ steps.get-ids-for-delete.outputs.ids-for-delete }}
+        if: ${{ steps.get-ids-for-delete.outputs.ids-for-delete != '' }}
