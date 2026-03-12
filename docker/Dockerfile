@@ -28,6 +28,10 @@ RUN git clone --depth=1 --branch ${MC_VERSION} https://github.com/minio/mc.git &
 # Runtime image
 FROM registry.access.redhat.com/ubi9/ubi-micro:latest
 
+# Install required tools
+RUN microdnf install -y gawk sed grep coreutils && \
+    microdnf clean all
+
 # Copy artifacts
 COPY --from=builder /tmp/minio /usr/bin/minio
 COPY --from=builder /tmp/mc /usr/bin/mc
