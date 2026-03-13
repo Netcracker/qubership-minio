@@ -26,17 +26,13 @@ RUN git clone --depth=1 --branch ${MC_VERSION} https://github.com/minio/mc.git &
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o /tmp/mc .
 
 # Runtime image
-FROM registry.access.redhat.com/ubi9/ubi-micro:latest
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 # Copy artifacts
 COPY --from=builder \
     /tmp/minio \
     /tmp/mc \
     /workspace/minio/dockerscripts/docker-entrypoint.sh \
-    /bin/sed \
-    /bin/grep \
-    /usr/bin/awk \
-    /usr/bin/tr \
     /usr/bin/
 
 RUN chmod +x /usr/bin/docker-entrypoint.sh
