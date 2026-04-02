@@ -26,7 +26,8 @@ RUN git clone --depth=1 --branch ${MC_VERSION} https://github.com/minio/mc.git &
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o /tmp/mc .
 
 # Runtime image
-FROM registry.access.redhat.com/ubi10/ubi-micro:latest
+# FROM registry.access.redhat.com/ubi10/ubi-micro:latest
+FROM alpine:3.23.3
 
 # Copy artifacts
 COPY --from=builder \
