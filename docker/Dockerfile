@@ -12,7 +12,7 @@ WORKDIR /workspace
 # Clone & build MinIO
 RUN git clone --depth=1 --branch ${MINIO_VERSION} https://github.com/minio/minio.git && \
     cd minio && \
-    go mod edit -go=1.26 -toolchain=go1.26.1 -require=golang.org/x/crypto@v0.47.0 -require=github.com/go-jose/go-jose/v4@4.1.4 -require=go.opentelemetry.io/otel/sdk@v1.42.0 -require=google.golang.org/grpc@v1.80.0 -require=github.com/buger/jsonparser@v1.1.2 && \
+    go mod edit -go=1.26 -toolchain=go1.26.1 -require=golang.org/x/crypto@v0.47.0 -require=github.com/go-jose/go-jose@v4.1.4 -require=go.opentelemetry.io/otel/sdk@v1.42.0 -require=google.golang.org/grpc@v1.80.0 -require=github.com/buger/jsonparser@v1.1.2 && \
     go mod tidy && \
     go mod download && \
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -ldflags "-X github.com/minio/minio/cmd.Version=${MINIO_VERSION} -X github.com/minio/minio/cmd.ReleaseTag=${MINIO_VERSION}" -a -o /tmp/minio .
