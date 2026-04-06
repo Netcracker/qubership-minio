@@ -1,4 +1,4 @@
-# Build binaries
+# Build binaries 
 FROM golang:1.26.1-alpine3.22 AS builder
 
 ENV MINIO_VERSION=RELEASE.2025-10-15T17-29-55Z
