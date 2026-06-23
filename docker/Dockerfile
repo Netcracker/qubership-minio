@@ -1,7 +1,7 @@
 # Build binaries 
-FROM golang:1.26.1-alpine3.22 AS builder
+FROM golang:1.26.4-alpine3.24 AS builder
 
-ENV MINIO_VERSION=RELEASE.2025-10-15T17-29-55Z
+ENV MINIO_VERSION=RELEASE.2026-06-25T06-18-36Z
 ENV MC_VERSION=RELEASE.2025-08-13T08-35-41Z
 
 # Install minimal build deps
@@ -10,9 +10,9 @@ RUN apk add --no-cache git
 WORKDIR /workspace
 
 # Clone & build MinIO
-RUN git clone --depth=1 --branch ${MINIO_VERSION} https://github.com/minio/minio.git && \
+RUN git clone --depth=1 --branch RELEASE.2025-10-15T17-29-55Z https://github.com/minio/minio.git && \
     cd minio && \
-    go mod edit -go=1.26 -toolchain=go1.26.1 -require=golang.org/x/crypto@v0.47.0 -require=github.com/go-jose/go-jose/v4@v4.1.4 -require=go.opentelemetry.io/otel/sdk@v1.42.0 -require=google.golang.org/grpc@v1.80.0 -require=github.com/buger/jsonparser@v1.1.2 && \
+    go mod edit -go=1.26 -toolchain=go1.26.4 -require=github.com/Azure/go-ntlmssp@v0.1.1 -require=github.com/prometheus/prometheus@v0.312.0 -require=github.com/apache/thrift@0.23.0 -require=golang.org/x/net@v0.56.0 -require=golang.org/x/crypto@v0.53.0 -require=github.com/go-jose/go-jose/v4@v4.1.4 -require=go.opentelemetry.io/otel/sdk@v1.44.0 -require=google.golang.org/grpc@v1.80.0 -require=github.com/buger/jsonparser@v1.1.2 && \
     go mod tidy && \
     go mod download && \
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -ldflags "-X github.com/minio/minio/cmd.Version=${MINIO_VERSION} -X github.com/minio/minio/cmd.ReleaseTag=${MINIO_VERSION}" -a -o /tmp/minio .
@@ -20,14 +20,14 @@ RUN git clone --depth=1 --branch ${MINIO_VERSION} https://github.com/minio/minio
 # Clone & build mc
 RUN git clone --depth=1 --branch ${MC_VERSION} https://github.com/minio/mc.git && \
     cd mc && \
-    go mod edit -go=1.26 -toolchain=go1.26.1 -require=golang.org/x/crypto@v0.47.0 -require=google.golang.org/grpc@v1.80.0 && \
+    go mod edit -go=1.26 -toolchain=go1.26.4 -require=golang.org/x/crypto@v0.53.0 -require=google.golang.org/grpc@v1.80.0 && \
     go mod tidy && \
     go mod download && \
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o /tmp/mc .
 
 # Runtime image
 # FROM registry.access.redhat.com/ubi10/ubi-micro:latest
-FROM alpine:3.23.3
+FROM alpine:3.24.1
 
 # Copy artifacts
 COPY --from=builder \
