@@ -49,7 +49,7 @@ RUN git clone --depth=1 --branch ${MC_VERSION} https://github.com/minio/mc.git &
 
 # Runtime image
 # FROM registry.access.redhat.com/ubi10/ubi-micro:latest
-FROM alpine:3.23.3
+FROM alpine:3.24.2
 
 # Copy artifacts
 COPY --from=builder \
