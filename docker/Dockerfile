@@ -27,8 +27,9 @@ RUN git clone --depth=1 --branch ${MINIO_VERSION} https://github.com/minio/minio
       -require=golang.org/x/text@v0.42.0 \
       -require=golang.org/x/net@v0.59.0 \
       -require=github.com/eclipse/paho.mqtt.golang@v1.5.1 \
-      -require=github.com/lestrrat-go/jwx/v4@v4.5.0 \
-      -require=filippo.io/edwards25519@v1.2.0 && \
+      -require=filippo.io/edwards25519@v1.2.0 \
+      -require=github.com/Azure/go-ntlmssp@v0.1.1 \
+      -require=github.com/go-asn1-ber/asn1-ber@v1 && \
     go mod tidy && \
     go mod download && \
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -ldflags "-X github.com/minio/minio/cmd.Version=${MINIO_VERSION} -X github.com/minio/minio/cmd.ReleaseTag=${MINIO_VERSION}" -a -o /tmp/minio .
@@ -41,8 +42,7 @@ RUN git clone --depth=1 --branch ${MC_VERSION} https://github.com/minio/mc.git &
       -require=google.golang.org/grpc@v1.84.0 \
       -require=github.com/prometheus/prometheus@v0.313.0-rc.1 \
       -require=golang.org/x/text@v0.42.0 \
-      -require=golang.org/x/net@v0.59.0 \
-      -require=github.com/lestrrat-go/jwx/v4@v4.5.0 && \      
+      -require=golang.org/x/net@v0.59.0 && \      
     go mod tidy && \
     go mod download && \
     CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o /tmp/mc .
