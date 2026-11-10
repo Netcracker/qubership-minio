@@ -1,8 +1,8 @@
 # Build binaries 
 FROM golang:1.27.1-alpine3.24 AS builder
 
-ENV MINIO_VERSION=RELEASE.2025-10-15T17-29-55Z
-ENV MC_VERSION=RELEASE.2025-08-13T08-35-41Z
+ENV MINIO_VERSION=RELEASE.2024-01-16T16-07-38Z
+ENV MC_VERSION=RELEASE.2024-01-16T16-06-34Z
 
 # Install minimal build deps
 RUN apk add --no-cache git
@@ -10,7 +10,7 @@ RUN apk add --no-cache git
 WORKDIR /workspace
 
 # Clone & build MinIO
-RUN git clone --depth=1 --branch ${MINIO_VERSION} https://github.com/minio/minio.git && \
+RUN git clone --depth=1 --branch ${MINIO_VERSION} https://github.com/Netcracker/minio && \
     cd minio && \
     go mod edit -go=1.27 -toolchain=go1.27.1 \
       -require=golang.org/x/crypto@v0.57.0 \ 
